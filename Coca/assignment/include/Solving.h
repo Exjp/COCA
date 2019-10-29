@@ -17,7 +17,9 @@
 #include <z3.h>
 
 /**
- * @brief Generates a formula consisting of a variable representing the fact that @p node of graph number @p number is at position @p position of an accepting path.
+ * @brief Generates a formula consisting of a variable representing
+ *  the fact that @p node of graph number @p number is at position
+ *  @p position of an accepting path.
  * 
  * @param ctx The solver context.
  * @param number The number of the graph.
@@ -29,7 +31,8 @@
 Z3_ast getNodeVariable(Z3_context ctx, int number, int position, int k, int node);
 
 /**
- * @brief Generates a SAT formula satisfiable if and only if all graphs of @p graphs contain an accepting path of length @p pathLength.
+ * @brief Generates a SAT formula satisfiable if and only if all graphs
+ * of @p graphs contain an accepting path of length @p pathLength.
  * 
  * @param ctx The solver context.
  * @param graphs An array of graphs.
@@ -40,7 +43,8 @@ Z3_ast getNodeVariable(Z3_context ctx, int number, int position, int k, int node
 Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs,unsigned int numGraphs, int pathLength);
 
 /**
- * @brief Generates a SAT formula satisfiable if and only if all graphs of @p graphs contain an accepting path of common length.
+ * @brief Generates a SAT formula satisfiable if and only if all graphs
+ * of @p graphs contain an accepting path of common length.
  * 
  * @param ctx The solver context.
  * @param graphs An array of graphs.
