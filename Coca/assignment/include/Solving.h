@@ -15,6 +15,12 @@
 
 #include "Graph.h"
 #include <z3.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+//bool verbose;
+//bool printgraph;
+//bool printformula;
 
 /**
  * @brief Generates a formula consisting of a variable representing

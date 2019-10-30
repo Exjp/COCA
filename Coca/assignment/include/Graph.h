@@ -16,7 +16,9 @@
 
 
 
-/** @brief: the graph type. The first four fields are needed to represent a directed graph. The rest depends on needs. Here, the rest represents initial and final states of an automaton.*/
+/** @brief: the graph type. The first four fields are needed to represent
+ *  a directed graph. The rest depends on needs. Here, the rest represents 
+ * 	initial and final states of an automaton.*/
 typedef struct {
 	int numNodes; ///< The number of nodes of the graph.
 	int numEdges; ///< The number of edges of the graph.
