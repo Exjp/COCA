@@ -4,6 +4,7 @@
 #include <Solving.h>
 #include "Z3Tools.h"
 
+
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -126,12 +127,33 @@ Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
     return f3;
 }
 
+int getSourceNode(Graph graph){
+    for(int i = 0; i < graph.numNodes; i++){
+        if(isSource(graph, i)){
+            return i;
+        }
+    }
+    return 0; // pas de source ? retourne le premier noeud du graphe
+}
+
+int getEndNode(Graph graph){
+    for(int i = 0; i < graph.numNodes; i++){
+        if(isTarget(graph, i)){
+            return i;
+        }
+    }
+    return 0;
+}
+
 Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
+    int s, t;
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
         Z3_ast tab2[graphs[i].numNodes];
+        s = getSourceNode(graphs[i]);
+        t = getEndNode(graphs[i]);
         for( int q = 0 ; q < graphs[i].numNodes ; q++){
-            Z3_ast x[2] = {getNodeVariable(ctx,i,pathLength,pathLength,q), getNodeVariable(ctx,i,0,pathLength,q)};
+            Z3_ast x[2] = {getNodeVariable(ctx,i,s,pathLength,q), getNodeVariable(ctx,i,t,pathLength,q)};
             tab2[q] = Z3_mk_or(ctx,2, x);
         }
         tab1[i]= Z3_mk_or(ctx,graphs[i].numNodes,tab2);

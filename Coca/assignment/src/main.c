@@ -4,6 +4,8 @@
 #include "Z3Tools.h"
 #include "Solving.h"
 
+
+
 void usage(){
     printf("Usage: graphParser file\n");
     printf(" Displays information on the graph discribed by file. It should be provided with a .dot file\n");
@@ -19,9 +21,9 @@ int main(int argc, char* argv[]){
 
     Z3_context ctx = makeContext();
 
-    //verbose = false;
-    //printgraph = false;
-    //printformula = false;
+    bool verbose = false;
+    bool printgraph = false;
+    bool printformula = false;
 
     int startind = 1; // debut des arg graphe
     int k;
@@ -30,7 +32,7 @@ int main(int argc, char* argv[]){
     while(argv[startind][0] == '-'){
         switch (argv[startind][1])
         {
-            /*case ('v'):
+            case ('v'):
             {
                 verbose = true;
                 break;
@@ -44,7 +46,7 @@ int main(int argc, char* argv[]){
             {
                 printformula = true;
                 break;
-            }*/
+            }
             case('k'):
             {
                 startind++;
