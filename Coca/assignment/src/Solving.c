@@ -6,29 +6,23 @@
 #include "Z3Tools.h"
 #include <stdarg.h>
 
-extern bool printverbose;
-/**
- * @brief option to print the graph
- */
-extern bool printgraph;
-/**
- * @brief option to print the formula
- */
-extern bool printformula; 
+extern bool v_mode;
 
-// not working for the moment. currently using simple ifs below
-/*void print(char a , const char * fmt,...){
-    if(a=='a' || a == 'v' && printverbose || a == 'g' && printgraph || a == 'f' && printformula){
-        va_list ap;
-	    // You will get an unused variable message here -- ignore it.
-	    va_start (ap, fmt);
-        char s[50];
-        sprintf(s,fmt,ap);
-        printf("%s",s);
-        va_end(ap);
-        fflush(stdout);
-    }
-}*/
+extern bool g_mode;
+
+extern bool F_mode; 
+
+extern bool s_mode;
+
+extern bool d_mode;
+
+extern bool a_mode;
+
+extern bool t_mode;
+
+extern bool k_mode;
+
+extern int getkmax(Graph *graphs, unsigned int numGraphs);
 
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
@@ -54,7 +48,7 @@ Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
     }
     Z3_ast f1 = Z3_mk_and(ctx,numGraphs,tab1);
     int n = 9;
-    if (!printverbose) return f1;
+    if (!v_mode) return f1;
     Z3_lbool isSat = isFormulaSat(ctx,f1);
 
         switch (isSat)
@@ -89,7 +83,7 @@ Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         tab1[i] = Z3_mk_and(ctx,pathLength+1,tab2);
     }
     Z3_ast f2 = Z3_mk_and(ctx,numGraphs,tab1);
-    if (!printverbose) return f2;
+    if (!v_mode) return f2;
     Z3_lbool isSat = isFormulaSat(ctx,f2);
 
         switch (isSat)
@@ -133,7 +127,7 @@ Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
         tab1[i] = Z3_mk_and(ctx,graphs[i].numNodes,tab2) ;
     }
     Z3_ast f3 = Z3_mk_and(ctx,numGraphs,tab1);
-    if (!printverbose) return f3;
+    if (!v_mode) return f3;
     Z3_lbool isSat = isFormulaSat(ctx,f3);
 
         switch (isSat)
@@ -185,7 +179,7 @@ Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         tab1[i]= Z3_mk_and(ctx,2, x);
     }
     Z3_ast f4 = Z3_mk_and(ctx,numGraphs,tab1);
-    if(!printverbose) return f4;
+    if(!v_mode) return f4;
     Z3_lbool isSat = isFormulaSat(ctx,f4);
 
         switch (isSat)
@@ -226,7 +220,7 @@ Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pa
         tab1[i] = Z3_mk_and(ctx,pathLength,tab2);
     }
     Z3_ast f5 = Z3_mk_and(ctx,numGraphs,tab1);
-    if(!printverbose) return f5;
+    if(!v_mode) return f5;
     Z3_lbool isSat = isFormulaSat(ctx,f5);
 
         switch (isSat)
@@ -272,7 +266,7 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
     };
 
     Z3_ast formulaofGraphs = Z3_mk_and(ctx, 5, formulaofGraphsTab);
-    if(!printverbose) return formulaofGraphs;
+    if(!v_mode) return formulaofGraphs;
     Z3_lbool isSat = isFormulaSat(ctx,formulaofGraphs);
 
         switch (isSat)
@@ -326,11 +320,11 @@ int getSolutionLengthFromModel(Z3_context ctx, Z3_model model, Graph *graphs){
 
 void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength){
     for(int i =0; i<numGraph;i++){
-        printf("Chemin pour le graphe %d:\n",i);
+        printf("Path for graphe %d:\n",i);
         for(int j=0; j<=pathLength; j++){
             for(int q = 0;q<graphs[i].numNodes;q++){
                 if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, i,j, pathLength,q))){
-                    printf("q%d ",q);
+                    printf("pos %d: %s ",j,graphs[i].nodes[q]);
                     continue;
                 }
             }
