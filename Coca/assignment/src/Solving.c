@@ -339,3 +339,37 @@ void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numG
         printf("\n");
     }
 }
+
+void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength, char* name){
+    
+    File* fp;
+    for(int i = 0; i < numGraph; i++){
+        if(name[i] == NULL){
+            fp = fopen("result-l%d.dot",pathLength);
+        }
+        else{
+            fp = fopen("%s-l%d.dot",name[i], pathLength);
+        }
+        fprintf("q%d [initial=1,color=green];\n",getSourceNode(graphs[i]));
+        fprintf("q%d [initial=1,color=red];\n", getEndNode(graphs[i]));
+        for(int j = 0; j < pathlength; j++){                              
+            for(int s = 0; s < graphs[i].numNodes; s++){
+                for(int t = s+1; t < graphs[i].numNodes - 1; t++){
+                    if(isEdge(graphs[i],s,t)){
+                        fprintf(fp,"q%d -> q%d",s,t);
+                    }
+                    for(int k = 0; k < pathlength; k++){
+                        if(valueOfVarInModel(ctx,model,getNodeVariable(ctx,i,0,pathLength,q))){
+                            fprintf(fp," [color=blue]");
+                        }
+                    }
+                    fprintf(fp, ";\n");
+                }
+            }
+        }
+        fprintf(fp,"}");
+        fclose(fp);
+    }
+    
+}
+
