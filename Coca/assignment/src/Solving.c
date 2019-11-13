@@ -4,6 +4,7 @@
 #include <Solving.h>
 #include "Z3Tools.h"
 
+extern bool printgraph;
 
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
@@ -231,10 +232,11 @@ int getkmax(Graph *graphs, unsigned int numGraphs){
 }
 
 Z3_ast getNodeVariable(Z3_context ctx, int number, int position, int k, int node){
-    char nodechar[10000];
+    char nodechar[256];
     sprintf(nodechar,"x, %d, %d, %d, %d", number, position, k, node);
     return mk_bool_var(ctx, nodechar);
 }
+
 
 Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast formulaofGraphsTab[5] = {
@@ -244,9 +246,12 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
         fourthClause(ctx, graphs, numGraphs, pathLength),
         fithClause(ctx, graphs, numGraphs, pathLength),
     };
-
+    
     Z3_ast formulaofGraphs = Z3_mk_and(ctx, 5, formulaofGraphsTab);
-    // mettre pour les options la satisfiabilité de la formule
+    Z3_model model = getModelFromSatFormula(ctx,formulaofGraphs);
+    printf("valueOfVarInModel = %d\n", valueOfVarInModel(ctx, model, formulaofGraphs));
+    
+    printf("nombre de graphe = %d\n",numGraphs);
     return formulaofGraphs;
 }
 
@@ -256,6 +261,10 @@ Z3_ast graphsToFullFormula( Z3_context ctx, Graph *graphs,unsigned int numGraphs
     for(int i = 0; i < kmax; i++){
         formulakmax[i] = graphsToPathFormula(ctx,graphs,numGraphs,i);
     }
-    return Z3_mk_or(ctx, kmax, formulakmax);
+    Z3_ast formulaofGraphs = Z3_mk_or(ctx, kmax, formulakmax);
+    //printf("full formula = %s\n",Z3_ast_to_string(ctx,formulaofGraphs));
+    return formulaofGraphs;
 }
 
+void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength){
+}

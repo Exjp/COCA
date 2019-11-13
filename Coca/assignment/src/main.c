@@ -32,6 +32,11 @@ int main(int argc, char* argv[]){
     while(argv[startind][0] == '-'){
         switch (argv[startind][1])
         {
+            case('h'):
+            {
+                printf("toute les commandes et ce qu'on doit faire \n");
+                return 0;
+            }
             case ('v'):
             {
                 verbose = true;
@@ -70,19 +75,26 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-    printf("allo\n");
+
     Graph graph[argc-startind];
     for(int i= startind ; i< argc ; i++)
     {
         graph[i-startind] = getGraphFromFile(argv[i]);
-        printf(" i %d startind %d argc %d\n",i,startind,argc);
+        //printf(" i %d startind %d argc %d\n",i,startind,argc);
+        if(printgraph){
+            printf("affichage du graphe n°%d\n",(i-startind));
+            printGraph(graph[i-startind]);
+        }
     }
-    printf("allo\n");
+
+
     Z3_ast formula = (full)? graphsToFullFormula(ctx, graph, argc - startind) : graphsToPathFormula(ctx, graph, argc-startind, k);
+    
+    if(printformula){
+        printf("formula of graphsToPathFormula = %s\n",Z3_ast_to_string(ctx,formula));
+        
+    }
 
-
-    printf("allo\n");
-    //printf("formula of graphsToPathFormula = %s\n",Z3_ast_to_string(ctx,formula));
     Z3_lbool isSat = isFormulaSat(ctx,formula);
 
         switch (isSat)
@@ -97,7 +109,7 @@ int main(int argc, char* argv[]){
 
         case Z3_L_TRUE:
                 printf("the formula is satisfiable.\n");
-                //Z3_model model = getModelFromSatFormula(ctx,formula);
+                Z3_model model = getModelFromSatFormula(ctx,formula);
                 //printf("    The value of %s is %d\n",Z3_ast_to_string(ctx,x),valueOfVarInModel(ctx,model,x));
                 //printf("    The value of %s is %d\n",Z3_ast_to_string(ctx,y),valueOfVarInModel(ctx,model,y));
                 //printf("    The value of %s is %d\n",Z3_ast_to_string(ctx,negX),valueOfVarInModel(ctx,model,negX));
