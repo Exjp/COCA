@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <string.h>
 #include <Solving.h>
 #include "Z3Tools.h"
 #include <stdarg.h>
@@ -21,6 +22,10 @@ extern bool a_mode;
 extern bool t_mode;
 
 extern bool k_mode;
+
+extern bool f_mode;
+
+extern bool o_mode;
 
 extern int getkmax(Graph *graphs, unsigned int numGraphs);
 
@@ -153,7 +158,7 @@ int getSourceNode(Graph graph){
             return i;
         }
     }
-    return -1; // pas de source ? retourne le premier noeud du graphe
+    return -1;
 }
 
 int getEndNode(Graph graph){
@@ -267,6 +272,7 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
 
     Z3_ast formulaofGraphs = Z3_mk_and(ctx, 5, formulaofGraphsTab);
     if(!v_mode) return formulaofGraphs;
+    printf("formula for length %d found\n",pathLength);
     Z3_lbool isSat = isFormulaSat(ctx,formulaofGraphs);
 
         switch (isSat)
@@ -336,33 +342,44 @@ void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numG
 
 void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength, char* name){
     
-    File* fp;
+    FILE* fp;
     for(int i = 0; i < numGraph; i++){
-        if(name[i] == NULL){
-            fp = fopen("result-l%d.dot",pathLength);
-        }
-        else{
-            fp = fopen("%s-l%d.dot",name[i], pathLength);
-        }
-        fprintf("q%d [initial=1,color=green];\n",getSourceNode(graphs[i]));
-        fprintf("q%d [initial=1,color=red];\n", getEndNode(graphs[i]));
-        for(int j = 0; j < pathlength; j++){                              
-            for(int s = 0; s < graphs[i].numNodes; s++){
-                for(int t = s+1; t < graphs[i].numNodes - 1; t++){
-                    if(isEdge(graphs[i],s,t)){
-                        fprintf(fp,"q%d -> q%d",s,t);
-                    }
-                    for(int k = 0; k < pathlength; k++){
-                        if(valueOfVarInModel(ctx,model,getNodeVariable(ctx,i,0,pathLength,q))){
+        char * s =  (char *) malloc(1024*sizeof(char));;
+        if(name == NULL) sprintf(s,"sol/result-l%d.dot",pathLength);
+        else sprintf(s,"sol/%s-l%d.dot",name, pathLength);
+        fp = fopen(s, "w");
+        s=s+4;
+        if(name==NULL) s[strlen("result")] = '\0';
+        else s[strlen(name)] = '\0';
+        fprintf(fp,"digraph %s {\n",s);
+        fprintf(fp,"%s [initial=1,color=green][style=filled,fillcolor=lightblue];\n",graphs[i].nodes[getSourceNode(graphs[i])]);
+        fprintf(fp,"%s [final=1,color=red][style=filled,fillcolor=lightblue];\n", graphs[i].nodes[getEndNode(graphs[i])]);
+        for(int k = 1; k < pathLength; k++){
+            for(int q=0 ; q<graphs[i].numNodes ; q++){
+                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx,i,k,pathLength,q))){
+                    fprintf(fp,"%s [style=filled,fillcolor=lightblue];\n",graphs[i].nodes[q]);
+                }  
+            }
+        }                      
+        for(int s = 0; s < graphs[i].numNodes; s++){
+            for(int t = 0; t < graphs[i].numNodes; t++){
+                
+                if(isEdge(graphs[i],s,t)){
+                    fprintf(fp,"%s -> %s",graphs[i].nodes[s],graphs[i].nodes[t]);
+                    for(int k = 0; k < pathLength; k++){
+                        if(valueOfVarInModel(ctx,model,getNodeVariable(ctx,i,k,pathLength,s)) && valueOfVarInModel(ctx,model,getNodeVariable(ctx,i,k+1,pathLength,t))){
                             fprintf(fp," [color=blue]");
+                            break;
                         }
                     }
                     fprintf(fp, ";\n");
                 }
             }
         }
+        s=s-4;
         fprintf(fp,"}");
         fclose(fp);
+        free(s);
     }
     
 }

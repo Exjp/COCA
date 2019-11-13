@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <Graph.h>
 #include <Parsing.h>
 #include "Z3Tools.h"
@@ -12,6 +13,8 @@ bool d_mode;
 bool a_mode;
 bool t_mode;
 bool k_mode;
+bool f_mode;
+bool o_mode;
 
 int getkmax(Graph *graphs, unsigned int numGraphs);
 
@@ -53,6 +56,10 @@ int main(int argc, char* argv[]){
     a_mode = false;
     t_mode = false;
     k_mode = false;
+    f_mode = false;
+    o_mode = false;
+    int name_ind = 0;
+
     int startind = 1; // debut des arg graphe
     int k;
     
@@ -84,7 +91,7 @@ int main(int argc, char* argv[]){
             {
                 startind++;
                 if(startind >= argc){
-                    printf("wrong argument: a number nedd to be placed after -k\n");
+                    printf("wrong argument: a number need to be placed after -k\n");
                     return 1;
                 }
                 k = atoi(argv[startind]);
@@ -109,6 +116,26 @@ int main(int argc, char* argv[]){
             case('t'):
             {
                 t_mode = true;
+                break;
+            }
+            case('f'):
+            {
+                f_mode = true;
+                break;
+            }
+            case('o'):
+            {
+                startind++;
+                if(startind >= argc){
+                    printf("wrong argument: a name need to be placed after -o\n");
+                    return 1;
+                }
+                if(strlen(argv[startind]) > 1000){
+                    printf("wrong argument: name too long\n");
+                    return 1;
+                }
+                name_ind = startind;
+                o_mode = true;
                 break;
             }
             default:
@@ -137,6 +164,10 @@ int main(int argc, char* argv[]){
         printf("wrong argument : you need to have -s in order to have -a\n");
         return 1;
     }
+    if(o_mode && !f_mode){
+        printf("wrong argument : you need to have -f in order to have -o\n");
+        return 1;
+    }
     Graph graph[argc-startind];
     for(int i= startind ; i< argc ; i++)
     {
@@ -150,6 +181,7 @@ int main(int argc, char* argv[]){
 
     if(!s_mode){
         Z3_ast formula = (!k_mode)? graphsToFullFormula(ctx, graph, argc - startind) : graphsToPathFormula(ctx, graph, argc-startind, k);
+        if(v_mode) printf("Formula found\n");
         if(F_mode) printf("Formula is :\n%s\n",Z3_ast_to_string(ctx,formula));
         Z3_lbool isSat = isFormulaSat(ctx,formula);
 
@@ -164,15 +196,21 @@ int main(int argc, char* argv[]){
             break;
 
         case Z3_L_TRUE:
-                printf("the formula is satisfiable.\n");
+                
                 Z3_model model = getModelFromSatFormula(ctx,formula);
+                if(v_mode) printf("Model done\n");
                 if(!k_mode) k = getSolutionLengthFromModel(ctx,model,graph);
+                printf("the formula is satisfiable, all graphs have a path of length %d.\n",k);
                 if(t_mode) printPathsFromModel(ctx,model,graph,argc - startind, k);
+                if(f_mode)
+                    if(o_mode) createDotFromModel(ctx,model,graph,argc - startind,k,argv[name_ind]);
+                    else createDotFromModel(ctx,model,graph,argc - startind,k,NULL);
                 break;
         }
     }
     else{
         int kmax = getkmax(graph, argc-startind);
+        if(v_mode) printf("preparing to test %d formulas\n",kmax);
         for(int ktmp=0;ktmp<=kmax;ktmp++)
         {   
             if(d_mode) k = kmax-ktmp;
@@ -195,6 +233,9 @@ int main(int argc, char* argv[]){
                 printf("the formula is satisfiable.\n");
                 Z3_model model = getModelFromSatFormula(ctx,formula);
                 if(t_mode) printPathsFromModel(ctx,model,graph,argc - startind, k);
+                if(f_mode) 
+                    if(o_mode)createDotFromModel(ctx,model,graph,argc - startind,k,argv[name_ind]);
+                    else createDotFromModel(ctx,model,graph,argc - startind,k,NULL);
                 if(!a_mode) return 0;
                 break;
             }
