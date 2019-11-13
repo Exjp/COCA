@@ -248,10 +248,17 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
     };
     
     Z3_ast formulaofGraphs = Z3_mk_and(ctx, 5, formulaofGraphsTab);
+<<<<<<< Updated upstream
     Z3_model model = getModelFromSatFormula(ctx,formulaofGraphs);
     printf("valueOfVarInModel = %d\n", valueOfVarInModel(ctx, model, formulaofGraphs));
     
     printf("nombre de graphe = %d\n",numGraphs);
+=======
+    for(int i = 0; i < numGraphs; i++){
+        printGraph(graphs[i]);
+    }
+    // mettre pour les options la satisfiabilité de la formule
+>>>>>>> Stashed changes
     return formulaofGraphs;
 }
 

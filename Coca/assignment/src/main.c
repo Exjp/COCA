@@ -87,14 +87,10 @@ int main(int argc, char* argv[]){
         }
     }
 
-
     Z3_ast formula = (full)? graphsToFullFormula(ctx, graph, argc - startind) : graphsToPathFormula(ctx, graph, argc-startind, k);
-    
-    if(printformula){
-        printf("formula of graphsToPathFormula = %s\n",Z3_ast_to_string(ctx,formula));
-        
-    }
 
+
+    printf("formula of graphsToPathFormula = %s\n",Z3_ast_to_string(ctx,formula));
     Z3_lbool isSat = isFormulaSat(ctx,formula);
 
         switch (isSat)
