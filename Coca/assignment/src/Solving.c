@@ -1,9 +1,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include <Solving.h>
 #include "Z3Tools.h"
+#include <stdarg.h>
 
+extern bool printverbose;
+/**
+ * @brief option to print the graph
+ */
+extern bool printgraph;
+/**
+ * @brief option to print the formula
+ */
+extern bool printformula; 
+
+// not working for the moment. currently using simple ifs below
+/*void print(char a , const char * fmt,...){
+    if(a=='a' || a == 'v' && printverbose || a == 'g' && printgraph || a == 'f' && printformula){
+        va_list ap;
+	    // You will get an unused variable message here -- ignore it.
+	    va_start (ap, fmt);
+        char s[50];
+        sprintf(s,fmt,ap);
+        printf("%s",s);
+        va_end(ap);
+        fflush(stdout);
+    }
+}*/
 
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
@@ -28,8 +53,9 @@ Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
         tab1[i] = Z3_mk_and(ctx,pathLength+1,tab2);
     }
     Z3_ast f1 = Z3_mk_and(ctx,numGraphs,tab1);
-    //printf("formula clause 1 = %s\n",Z3_ast_to_string(ctx,f1));
-    /*Z3_lbool isSat = isFormulaSat(ctx,f1);
+    int n = 9;
+    if (!printverbose) return f1;
+    Z3_lbool isSat = isFormulaSat(ctx,f1);
 
         switch (isSat)
         {
@@ -44,7 +70,7 @@ Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
         case Z3_L_TRUE:
                 printf("the formula 1 is satisfiable.\n");
                 break;
-        }*/
+        }
     return f1;
 }
 
@@ -63,8 +89,8 @@ Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         tab1[i] = Z3_mk_and(ctx,pathLength+1,tab2);
     }
     Z3_ast f2 = Z3_mk_and(ctx,numGraphs,tab1);
-    //printf("formula clause 2 = %s\n",Z3_ast_to_string(ctx,f2));
-    /*Z3_lbool isSat = isFormulaSat(ctx,f2);
+    if (!printverbose) return f2;
+    Z3_lbool isSat = isFormulaSat(ctx,f2);
 
         switch (isSat)
         {
@@ -79,7 +105,7 @@ Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         case Z3_L_TRUE:
                 printf("the formula 2 is satisfiable.\n");
                 break;
-        }*/
+        }
         return f2;
 }
 
@@ -107,8 +133,8 @@ Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
         tab1[i] = Z3_mk_and(ctx,graphs[i].numNodes,tab2) ;
     }
     Z3_ast f3 = Z3_mk_and(ctx,numGraphs,tab1);
-    //printf("formula clause 3 = %s\n",Z3_ast_to_string(ctx,f3));
-    /*Z3_lbool isSat = isFormulaSat(ctx,f3);
+    if (!printverbose) return f3;
+    Z3_lbool isSat = isFormulaSat(ctx,f3);
 
         switch (isSat)
         {
@@ -123,7 +149,7 @@ Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
         case Z3_L_TRUE:
                 printf("the formula 3 is satisfiable.\n");
                 break;
-        }*/
+        }
     return f3;
 }
 
@@ -133,7 +159,7 @@ int getSourceNode(Graph graph){
             return i;
         }
     }
-    return 0; // pas de source ? retourne le premier noeud du graphe
+    return -1; // pas de source ? retourne le premier noeud du graphe
 }
 
 int getEndNode(Graph graph){
@@ -142,25 +168,25 @@ int getEndNode(Graph graph){
             return i;
         }
     }
-    return 0;
+    return -1;
 }
 
 Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     int s, t;
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
-        Z3_ast tab2[graphs[i].numNodes];
         s = getSourceNode(graphs[i]);
         t = getEndNode(graphs[i]);
-        for( int q = 0 ; q < graphs[i].numNodes ; q++){
-            Z3_ast x[2] = {getNodeVariable(ctx,i,s,pathLength,q), getNodeVariable(ctx,i,t,pathLength,q)};
-            tab2[q] = Z3_mk_or(ctx,2, x);
+        if(s==-1 || t==-1){
+            tab1[i] = Z3_mk_false(ctx);
+            continue;
         }
-        tab1[i]= Z3_mk_or(ctx,graphs[i].numNodes,tab2);
+        Z3_ast x[2] = {getNodeVariable(ctx,0,s,pathLength,s), getNodeVariable(ctx,i,pathLength,pathLength,t)};
+        tab1[i]= Z3_mk_and(ctx,2, x);
     }
-   Z3_ast f4 = Z3_mk_and(ctx,numGraphs,tab1);
-    //printf("formula clause 4 = %s\n",Z3_ast_to_string(ctx,f4));
-    /*Z3_lbool isSat = isFormulaSat(ctx,f4);
+    Z3_ast f4 = Z3_mk_and(ctx,numGraphs,tab1);
+    if(!printverbose) return f4;
+    Z3_lbool isSat = isFormulaSat(ctx,f4);
 
         switch (isSat)
         {
@@ -175,7 +201,7 @@ Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         case Z3_L_TRUE:
                 printf("the formula 4 is satisfiable.\n");
                 break;
-        }*/
+        }
     return f4;
 }
 
@@ -200,8 +226,8 @@ Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pa
         tab1[i] = Z3_mk_and(ctx,pathLength,tab2);
     }
     Z3_ast f5 = Z3_mk_and(ctx,numGraphs,tab1);
-    //printf("formula clause 5 = %s\n",Z3_ast_to_string(ctx,f5));
-    /*Z3_lbool isSat = isFormulaSat(ctx,f5);
+    if(!printverbose) return f5;
+    Z3_lbool isSat = isFormulaSat(ctx,f5);
 
         switch (isSat)
         {
@@ -216,7 +242,7 @@ Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pa
         case Z3_L_TRUE:
                 printf("the formula 5 is satisfiable.\n");
                 break;
-        }*/
+        }
     return f5;
 }
 
@@ -246,16 +272,70 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
     };
 
     Z3_ast formulaofGraphs = Z3_mk_and(ctx, 5, formulaofGraphsTab);
-    // mettre pour les options la satisfiabilité de la formule
+    if(!printverbose) return formulaofGraphs;
+    Z3_lbool isSat = isFormulaSat(ctx,formulaofGraphs);
+
+        switch (isSat)
+        {
+        case Z3_L_FALSE:
+            printf("the formula with pathlength %d is not satisfiable.\n",pathLength);
+            break;
+
+        case Z3_L_UNDEF:
+                printf("We don't know if the formula with pathlength %d is satisfiable.\n");
+            break;
+
+        case Z3_L_TRUE:
+                printf("the formula with pathlength %d is satisfiable.\n");
+                break;
+        }
     return formulaofGraphs;
 }
 
 Z3_ast graphsToFullFormula( Z3_context ctx, Graph *graphs,unsigned int numGraphs){
     int kmax = getkmax(graphs, numGraphs);
     Z3_ast formulakmax[kmax];
+    int cpt = 0;
     for(int i = 0; i < kmax; i++){
-        formulakmax[i] = graphsToPathFormula(ctx,graphs,numGraphs,i);
+        Z3_ast tmp = graphsToPathFormula(ctx,graphs,numGraphs,i);
+        if(isFormulaSat(ctx,tmp)){
+            formulakmax[cpt] = tmp;
+            cpt++;
+        }
     }
-    return Z3_mk_or(ctx, kmax, formulakmax);
+    if(cpt == 0) return Z3_mk_false(ctx);
+    Z3_ast ret = Z3_mk_or(ctx, cpt, formulakmax);
+    return ret;
 }
 
+int getSolutionLengthFromModel(Z3_context ctx, Z3_model model, Graph *graphs){
+    int kmax = graphs[0].numEdges;
+    int k;
+    for(k=0;k<=kmax;k++){
+        bool oneok = false;
+            for(int q=0;q<graphs[0].numNodes;q++){
+                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, 0,k,k,q))){
+                    oneok =true;
+                    break;
+                }
+            }
+        if(oneok) break;
+    }
+    return k;
+}
+
+void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength){
+    for(int i =0; i<numGraph;i++){
+        printf("Chemin pour le graphe %d:\n",i);
+        for(int j=0; j<=pathLength; j++){
+            for(int q = 0;q<graphs[i].numNodes;q++){
+                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, i,j, pathLength,q))){
+                    printf("q%d ",q);
+                    continue;
+                }
+            }
+            if(j+1<=pathLength) printf("-> ");
+        }
+        printf("\n");
+    }
+}

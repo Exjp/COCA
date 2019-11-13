@@ -17,9 +17,7 @@
 #include <z3.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
-
-
+ 
 /**
  * @brief Generates a formula consisting of a variable representing
  *  the fact that @p node of graph number @p number is at position

@@ -4,7 +4,9 @@
 #include "Z3Tools.h"
 #include "Solving.h"
 
-
+bool printverbose;
+bool printgraph;
+bool printformula;
 
 void usage(){
     printf("Usage: graphParser file\n");
@@ -21,9 +23,9 @@ int main(int argc, char* argv[]){
 
     Z3_context ctx = makeContext();
 
-    bool verbose = false;
-    bool printgraph = false;
-    bool printformula = false;
+    printverbose = false;
+    printgraph = false;
+    printformula = false;
 
     int startind = 1; // debut des arg graphe
     int k;
@@ -34,7 +36,7 @@ int main(int argc, char* argv[]){
         {
             case ('v'):
             {
-                verbose = true;
+                printverbose = true;
                 break;
             }
             case('g'):
@@ -70,19 +72,17 @@ int main(int argc, char* argv[]){
             return 0;
         }
     }
-    printf("allo\n");
     Graph graph[argc-startind];
     for(int i= startind ; i< argc ; i++)
     {
         graph[i-startind] = getGraphFromFile(argv[i]);
-        printf(" i %d startind %d argc %d\n",i,startind,argc);
+        if(printgraph){
+            printf("graph %d:\n",i-startind);
+            printGraph(graph[i-startind]);
+        }
     }
-    printf("allo\n");
     Z3_ast formula = (full)? graphsToFullFormula(ctx, graph, argc - startind) : graphsToPathFormula(ctx, graph, argc-startind, k);
 
-
-    printf("allo\n");
-    //printf("formula of graphsToPathFormula = %s\n",Z3_ast_to_string(ctx,formula));
     Z3_lbool isSat = isFormulaSat(ctx,formula);
 
         switch (isSat)
@@ -97,12 +97,13 @@ int main(int argc, char* argv[]){
 
         case Z3_L_TRUE:
                 printf("the formula is satisfiable.\n");
-                //Z3_model model = getModelFromSatFormula(ctx,formula);
-                //printf("    The value of %s is %d\n",Z3_ast_to_string(ctx,x),valueOfVarInModel(ctx,model,x));
-                //printf("    The value of %s is %d\n",Z3_ast_to_string(ctx,y),valueOfVarInModel(ctx,model,y));
-                //printf("    The value of %s is %d\n",Z3_ast_to_string(ctx,negX),valueOfVarInModel(ctx,model,negX));
-                //break;
+                Z3_model model = getModelFromSatFormula(ctx,formula);
+                if(full) k = getSolutionLengthFromModel(ctx,model,graph);
+                printf("k= %d\n",k);
+                printPathsFromModel(ctx,model,graph,argc - startind, k);
+                break;
         }
     //printf("Formula %s created.\n",Z3_ast_to_string(ctx,formula));
+    
 
 }
