@@ -345,14 +345,12 @@ void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numG
 void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength, char* name){
     
     FILE* fp;
+    char * stmp =  (char *) malloc(1024*sizeof(char));;
+    if(name == NULL) sprintf(stmp,"sol/result-l%d.dot",pathLength);
+    else sprintf(stmp,"sol/%s-l%d.dot",name, pathLength);
+    fp = fopen(stmp, "w");
+    free(stmp);
     for(int i = 0; i < numGraph; i++){
-        char * s =  (char *) malloc(1024*sizeof(char));;
-        if(name == NULL) sprintf(s,"sol/result-%dl%d.dot",i,pathLength);
-        else sprintf(s,"sol/%s-%dl%d.dot",name, i, pathLength);
-        fp = fopen(s, "w");
-        s=s+4;
-        if(name==NULL) s[strlen("result")] = '\0';
-        else s[strlen(name)] = '\0';
         fprintf(fp,"digraph G%i {\n",i);
         fprintf(fp,"%s [initial=1,color=green][style=filled,fillcolor=lightblue];\n",graphs[i].nodes[getSourceNode(graphs[i])]);
         fprintf(fp,"%s [final=1,color=red][style=filled,fillcolor=lightblue];\n", graphs[i].nodes[getEndNode(graphs[i])]);
@@ -380,10 +378,8 @@ void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGr
             printf("\n");
             printf("\n");
         }
-        s=s-4;
         fprintf(fp,"}");
         fclose(fp);
-        free(s);
     }
     
 }
