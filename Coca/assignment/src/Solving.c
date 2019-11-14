@@ -27,6 +27,8 @@ extern bool f_mode;
 
 extern bool o_mode;
 
+extern bool h_mode;
+
 extern int getkmax(Graph *graphs, unsigned int numGraphs);
 
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){

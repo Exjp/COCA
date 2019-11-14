@@ -15,10 +15,12 @@ bool t_mode;
 bool k_mode;
 bool f_mode;
 bool o_mode;
+bool h_mode;
 
 int getkmax(Graph *graphs, unsigned int numGraphs);
 
 void usage(){
+    if(h_mode) return;
     printf("Use: equalPath [options] files...\n");
     printf(" Each file should contain a graph in dot format.\n");
     printf(" The program decides if there exists a length n such that each input graph has a valid simple path of length n.\n");
@@ -35,6 +37,7 @@ void usage(){
     printf(" -t          Displays the paths found on the terminal [if not present, only displays the existence of the path].\n");
     printf("\n");
     printf("\n");
+    h_mode = true;
 
 }
 
@@ -58,6 +61,7 @@ int main(int argc, char* argv[]){
     k_mode = false;
     f_mode = false;
     o_mode = false;
+    h_mode = false;
     int name_ind = 0;
 
     int startind = 1; // debut des arg graphe
