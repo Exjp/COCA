@@ -74,7 +74,7 @@ int main(int argc, char* argv[]){
             case ('h'):
             {
                 usage();
-                break;
+                return 0;
             }
             case ('v'):
             {
