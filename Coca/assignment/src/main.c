@@ -5,6 +5,7 @@
 #include "Z3Tools.h"
 #include "Solving.h"
 
+//bool variables for the options
 bool v_mode;
 bool g_mode;
 bool F_mode;
@@ -17,8 +18,10 @@ bool f_mode;
 bool o_mode;
 bool h_mode;
 
+//get the minimum number of edges among the graphes
 int getkmax(Graph *graphs, unsigned int numGraphs);
 
+//Call this if the user is a bit lost
 void usage(){
     if(h_mode) return;
     printf("Use: equalPath [options] files...\n");
@@ -50,9 +53,9 @@ int main(int argc, char* argv[]){
         usage();
         return 0;
     }
-
     Z3_context ctx = makeContext();
 
+    //init the options
     v_mode = false;
     g_mode = false;
     F_mode = false;
@@ -66,8 +69,8 @@ int main(int argc, char* argv[]){
     h_mode = false;
     int name_ind = 0;
 
-    int startind = 1; // debut des arg graphe
-    int k;
+    int startind = 1; // index where the graphs should start
+    int k; //supposedly the lenght of the path
     
 
     while(argv[startind][0] == '-'){
@@ -157,7 +160,7 @@ int main(int argc, char* argv[]){
             return 1;
         }
     }
-
+    //wrong option combination checker
     if(k_mode && s_mode){
         printf("wrong argument: you can't have -s and -k at the same time\n");
         return 1;
@@ -174,6 +177,8 @@ int main(int argc, char* argv[]){
         printf("wrong argument : you need to have -f in order to have -o\n");
         return 1;
     }
+
+    //graph array construction
     Graph graph[argc-startind];
     for(int i= startind ; i< argc ; i++)
     {
@@ -185,7 +190,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    if(!s_mode){
+    if(!s_mode){ //if one formula has to be constructed
         Z3_ast formula = (!k_mode)? graphsToFullFormula(ctx, graph, argc - startind) : graphsToPathFormula(ctx, graph, argc-startind, k);
         if(v_mode) printf("Formula found\n");
         if(F_mode) printf("Formula is :\n%s\n",Z3_ast_to_string(ctx,formula));
@@ -214,7 +219,7 @@ int main(int argc, char* argv[]){
                 break;
         }
     }
-    else{
+    else{ //if several formulas have to be constructed
         int kmax = getkmax(graph, argc-startind);
         if(v_mode) printf("preparing to test %d formulas\n",kmax);
         for(int ktmp=0;ktmp<=kmax;ktmp++)
