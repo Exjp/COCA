@@ -11,6 +11,15 @@ extern bool v_mode;
 
 extern int getkmax(Graph *graphs, unsigned int numGraphs);
 
+/**
+ * @brief generate the first sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -55,7 +64,15 @@ Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
     return f1;
 }
 
-
+/**
+ * @brief generate the second sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -90,7 +107,15 @@ Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         return f2;
 }
 
-
+/**
+ * @brief generate the third sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -134,6 +159,12 @@ Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
     return f3;
 }
 
+/**
+ * @brief Get the Source Node
+ * @param graphs An array of graphs.
+ * @param graph 
+ * @return int the position of the source node
+ */
 int getSourceNode(Graph graph){
     for(int i = 0; i < graph.numNodes; i++){
         if(isSource(graph, i)){
@@ -143,6 +174,12 @@ int getSourceNode(Graph graph){
     return -1;
 }
 
+/**
+ * @brief Get the End Node
+ * 
+ * @param graphs An array of graphs.
+ * @return int the position of the last node
+ */
 int getEndNode(Graph graph){
     for(int i = 0; i < graph.numNodes; i++){
         if(isTarget(graph, i)){
@@ -152,6 +189,15 @@ int getEndNode(Graph graph){
     return -1;
 }
 
+/**
+ * @brief generate the fourth sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     int s, t;
     Z3_ast tab1[numGraphs];
@@ -186,6 +232,15 @@ Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
     return f4;
 }
 
+/**
+ * @brief generate the fifth sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -227,6 +282,13 @@ Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pa
     return f5;
 }
 
+/**
+ * @brief get the kmax of all graphs
+ * 
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @return int the kmax
+ */
 int getkmax(Graph *graphs, unsigned int numGraphs){
     int maxEdges = graphs[0].numEdges;
     for(int i = 1; i < numGraphs; i++){
