@@ -9,26 +9,6 @@
 
 extern bool v_mode;
 
-extern bool g_mode;
-
-extern bool F_mode; 
-
-extern bool s_mode;
-
-extern bool d_mode;
-
-extern bool a_mode;
-
-extern bool t_mode;
-
-extern bool k_mode;
-
-extern bool f_mode;
-
-extern bool o_mode;
-
-extern bool h_mode;
-
 extern int getkmax(Graph *graphs, unsigned int numGraphs);
 
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
