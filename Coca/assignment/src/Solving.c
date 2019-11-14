@@ -182,7 +182,7 @@ Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
             tab1[i] = Z3_mk_false(ctx);
             continue;
         }
-        Z3_ast x[2] = {getNodeVariable(ctx,0,s,pathLength,s), getNodeVariable(ctx,i,pathLength,pathLength,t)};
+        Z3_ast x[2] = {getNodeVariable(ctx,i,0,pathLength,s), getNodeVariable(ctx,i,pathLength,pathLength,t)};
         tab1[i]= Z3_mk_and(ctx,2, x);
     }
     Z3_ast f4 = Z3_mk_and(ctx,numGraphs,tab1);
@@ -284,11 +284,11 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
             break;
 
         case Z3_L_UNDEF:
-                printf("We don't know if the formula with pathlength %d is satisfiable.\n");
+                printf("We don't know if the formula with pathlength %d is satisfiable.\n",pathLength);
             break;
 
         case Z3_L_TRUE:
-                printf("the formula with pathlength %d is satisfiable.\n");
+                printf("the formula with pathlength %d is satisfiable.\n",pathLength);
                 break;
         }
     return formulaofGraphs;
@@ -300,7 +300,7 @@ Z3_ast graphsToFullFormula( Z3_context ctx, Graph *graphs,unsigned int numGraphs
     int cpt = 0;
     for(int i = 0; i < kmax; i++){
         Z3_ast tmp = graphsToPathFormula(ctx,graphs,numGraphs,i);
-        if(isFormulaSat(ctx,tmp)){
+        if(isFormulaSat(ctx,tmp) == Z3_L_TRUE){
             formulakmax[cpt] = tmp;
             cpt++;
         }
@@ -316,7 +316,7 @@ int getSolutionLengthFromModel(Z3_context ctx, Z3_model model, Graph *graphs){
     for(k=0;k<=kmax;k++){
         bool oneok = false;
             for(int q=0;q<graphs[0].numNodes;q++){
-                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, 0,k,k,q))){
+                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, 0,k,k,q))&& isTarget(graphs[0],q)){
                     oneok =true;
                     break;
                 }
@@ -347,8 +347,8 @@ void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGr
     FILE* fp;
     for(int i = 0; i < numGraph; i++){
         char * s =  (char *) malloc(1024*sizeof(char));;
-        if(name == NULL) sprintf(s,"sol/result-l%d.dot",pathLength);
-        else sprintf(s,"sol/%s-l%d.dot",name, pathLength);
+        if(name == NULL) sprintf(s,"sol/result-%dl%d.dot",i,pathLength);
+        else sprintf(s,"sol/%s-%dl%d.dot",name, i, pathLength);
         fp = fopen(s, "w");
         s=s+4;
         if(name==NULL) s[strlen("result")] = '\0';
