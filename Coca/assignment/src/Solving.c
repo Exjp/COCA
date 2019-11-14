@@ -353,7 +353,7 @@ void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGr
         s=s+4;
         if(name==NULL) s[strlen("result")] = '\0';
         else s[strlen(name)] = '\0';
-        fprintf(fp,"digraph %s {\n",s);
+        fprintf(fp,"digraph G%i {\n",i);
         fprintf(fp,"%s [initial=1,color=green][style=filled,fillcolor=lightblue];\n",graphs[i].nodes[getSourceNode(graphs[i])]);
         fprintf(fp,"%s [final=1,color=red][style=filled,fillcolor=lightblue];\n", graphs[i].nodes[getEndNode(graphs[i])]);
         for(int k = 1; k < pathLength; k++){
@@ -377,6 +377,8 @@ void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGr
                     fprintf(fp, ";\n");
                 }
             }
+            printf("\n");
+            printf("\n");
         }
         s=s-4;
         fprintf(fp,"}");
