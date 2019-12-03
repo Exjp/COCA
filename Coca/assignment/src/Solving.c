@@ -9,26 +9,17 @@
 
 extern bool v_mode;
 
-extern bool g_mode;
-
-extern bool F_mode; 
-
-extern bool s_mode;
-
-extern bool d_mode;
-
-extern bool a_mode;
-
-extern bool t_mode;
-
-extern bool k_mode;
-
-extern bool f_mode;
-
-extern bool o_mode;
-
 extern int getkmax(Graph *graphs, unsigned int numGraphs);
 
+/**
+ * @brief generate the first sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -73,7 +64,15 @@ Z3_ast firstClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
     return f1;
 }
 
-
+/**
+ * @brief generate the second sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -108,7 +107,15 @@ Z3_ast secondClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
         return f2;
 }
 
-
+/**
+ * @brief generate the third sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -152,6 +159,12 @@ Z3_ast thirdClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int p
     return f3;
 }
 
+/**
+ * @brief Get the Source Node
+ * @param graphs An array of graphs.
+ * @param graph 
+ * @return int the position of the source node
+ */
 int getSourceNode(Graph graph){
     for(int i = 0; i < graph.numNodes; i++){
         if(isSource(graph, i)){
@@ -161,6 +174,12 @@ int getSourceNode(Graph graph){
     return -1;
 }
 
+/**
+ * @brief Get the End Node
+ * 
+ * @param graphs An array of graphs.
+ * @return int the position of the last node
+ */
 int getEndNode(Graph graph){
     for(int i = 0; i < graph.numNodes; i++){
         if(isTarget(graph, i)){
@@ -170,6 +189,15 @@ int getEndNode(Graph graph){
     return -1;
 }
 
+/**
+ * @brief generate the fourth sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     int s, t;
     Z3_ast tab1[numGraphs];
@@ -180,7 +208,7 @@ Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
             tab1[i] = Z3_mk_false(ctx);
             continue;
         }
-        Z3_ast x[2] = {getNodeVariable(ctx,0,s,pathLength,s), getNodeVariable(ctx,i,pathLength,pathLength,t)};
+        Z3_ast x[2] = {getNodeVariable(ctx,i,0,pathLength,s), getNodeVariable(ctx,i,pathLength,pathLength,t)};
         tab1[i]= Z3_mk_and(ctx,2, x);
     }
     Z3_ast f4 = Z3_mk_and(ctx,numGraphs,tab1);
@@ -204,6 +232,15 @@ Z3_ast fourthClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int 
     return f4;
 }
 
+/**
+ * @brief generate the fifth sub-formula
+ * 
+ * @param ctx The solver context.
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @param pathLength The length of the path to check.
+ * @return Z3_ast the formula
+ */
 Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pathLength){
     Z3_ast tab1[numGraphs];
     for( int i = 0 ; i < numGraphs ; i ++){
@@ -245,6 +282,13 @@ Z3_ast fithClause( Z3_context ctx, Graph *graphs, unsigned int numGraphs, int pa
     return f5;
 }
 
+/**
+ * @brief get the kmax of all graphs
+ * 
+ * @param graphs An array of graphs.
+ * @param numGraphs The number of graphs in @p graphs.
+ * @return int the kmax
+ */
 int getkmax(Graph *graphs, unsigned int numGraphs){
     int maxEdges = graphs[0].numEdges;
     for(int i = 1; i < numGraphs; i++){
@@ -282,11 +326,11 @@ Z3_ast graphsToPathFormula( Z3_context ctx, Graph *graphs, unsigned int numGraph
             break;
 
         case Z3_L_UNDEF:
-                printf("We don't know if the formula with pathlength %d is satisfiable.\n");
+                printf("We don't know if the formula with pathlength %d is satisfiable.\n",pathLength);
             break;
 
         case Z3_L_TRUE:
-                printf("the formula with pathlength %d is satisfiable.\n");
+                printf("the formula with pathlength %d is satisfiable.\n",pathLength);
                 break;
         }
     return formulaofGraphs;
@@ -298,7 +342,7 @@ Z3_ast graphsToFullFormula( Z3_context ctx, Graph *graphs,unsigned int numGraphs
     int cpt = 0;
     for(int i = 0; i < kmax; i++){
         Z3_ast tmp = graphsToPathFormula(ctx,graphs,numGraphs,i);
-        if(isFormulaSat(ctx,tmp)){
+        if(isFormulaSat(ctx,tmp) == Z3_L_TRUE){
             formulakmax[cpt] = tmp;
             cpt++;
         }
@@ -314,7 +358,7 @@ int getSolutionLengthFromModel(Z3_context ctx, Z3_model model, Graph *graphs){
     for(k=0;k<=kmax;k++){
         bool oneok = false;
             for(int q=0;q<graphs[0].numNodes;q++){
-                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, 0,k,k,q))){
+                if(valueOfVarInModel(ctx,model,getNodeVariable(ctx, 0,k,k,q))&& isTarget(graphs[0],q)){
                     oneok =true;
                     break;
                 }
@@ -343,15 +387,13 @@ void printPathsFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numG
 void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGraph, int pathLength, char* name){
     
     FILE* fp;
+    char * stmp =  (char *) malloc(1024*sizeof(char));;
+    if(name == NULL) sprintf(stmp,"sol/result-l%d.dot",pathLength);
+    else sprintf(stmp,"sol/%s-l%d.dot",name, pathLength);
+    fp = fopen(stmp, "w");
+    free(stmp);
     for(int i = 0; i < numGraph; i++){
-        char * s =  (char *) malloc(1024*sizeof(char));;
-        if(name == NULL) sprintf(s,"sol/result-l%d.dot",pathLength);
-        else sprintf(s,"sol/%s-l%d.dot",name, pathLength);
-        fp = fopen(s, "w");
-        s=s+4;
-        if(name==NULL) s[strlen("result")] = '\0';
-        else s[strlen(name)] = '\0';
-        fprintf(fp,"digraph %s {\n",s);
+        fprintf(fp,"digraph G%i {\n",i);
         fprintf(fp,"%s [initial=1,color=green][style=filled,fillcolor=lightblue];\n",graphs[i].nodes[getSourceNode(graphs[i])]);
         fprintf(fp,"%s [final=1,color=red][style=filled,fillcolor=lightblue];\n", graphs[i].nodes[getEndNode(graphs[i])]);
         for(int k = 1; k < pathLength; k++){
@@ -375,11 +417,11 @@ void createDotFromModel(Z3_context ctx, Z3_model model, Graph *graphs, int numGr
                     fprintf(fp, ";\n");
                 }
             }
+            printf("\n");
+            printf("\n");
         }
-        s=s-4;
         fprintf(fp,"}");
         fclose(fp);
-        free(s);
     }
     
 }
