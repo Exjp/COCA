@@ -1,9 +1,9 @@
-#Documentation
+# Documentation
 This project is about to implement the reduction of common length. 
 The demo was produced by Vincent Penelle. 
 This archive was modified  for a project in group for the master of the University of Bordeaux, by Sofian Antri and Jacques Pourtier.
 
-##Installation
+## Installation
 To build the executable, do : 'make'. You will get the executable './equalPath'
 the other executable './working-equalPath' is an example given to represent the output of this project.
 To launch, do : './equalPath' then chose some option :
